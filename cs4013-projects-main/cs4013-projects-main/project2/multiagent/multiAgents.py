@@ -351,7 +351,50 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+
+    """
+    Evaluation function for Pacman to make better decisions.
+    
+    Features considered:
+    - Food proximity (encourage eating)
+    - Ghost proximity (avoid dangerous ghosts)
+    - Scared ghosts (encourage chasing)
+    - Remaining food count (penalize more dots)
+    - Game score as base heuristic
+    """
+
+    pacmanPos = currentGameState.getPacmanPosition()
+    foodList = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+
+    score = currentGameState.getScore()
+
+    # Encourage Pacman to eat the nearest food
+    if foodList:
+        closestFoodDist = min(manhattanDistance(pacmanPos, food) for food in foodList)
+        score += 10.0 / (closestFoodDist + 1)  # Higher reward for closer food
+
+    # Ghost interaction
+    for ghost in ghostStates:
+        ghostPos = ghost.getPosition()
+        ghostDist = manhattanDistance(pacmanPos, ghostPos)
+
+        if ghost.scaredTimer > 0:
+            # If ghosts are scared, encourage Pacman to chase them
+            score += 200.0 / (ghostDist + 1)
+        elif ghostDist < 2:
+            # If ghosts are close and active, apply a heavy penalty
+            score -= 500
+
+    # Encourage eating food by penalizing remaining food count
+    score -= 2 * len(foodList)
+
+    return score
+
+
+# util.raiseNotDefined()
+
 
 # Abbreviation
 better = betterEvaluationFunction
